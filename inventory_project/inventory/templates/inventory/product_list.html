@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Products</h1>
+        <a href="{% url 'product_create' %}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Add Product
+        </a>
+    </div>
+
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+        <div class="p-4 mb-4 {% if message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %} rounded">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="bg-white shadow-md rounded my-6">
+        <table class="min-w-full table-auto">
+            <thead>
+                <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+                    <th class="py-3 px-6 text-left">Name</th>
+                    <th class="py-3 px-6 text-left">SKU</th>
+                    <th class="py-3 px-6 text-left">Category</th>
+                    <th class="py-3 px-6 text-left">Supplier</th>
+                    <th class="py-3 px-6 text-right">Stock</th>
+                    <th class="py-3 px-6 text-right">Price</th>
+                </tr>
+            </thead>
+            <tbody class="text-gray-600 text-sm font-light">
+                {% for product in products %}
+                <tr class="border-b border-gray-200 hover:bg-gray-100">
+                    <td class="py-3 px-6 text-left">
+                        {% if product.id %}
+                        <a href="{% url 'product_detail' pk=product.id %}" class="text-blue-600 hover:text-blue-800">
+                            {{ product.name }}
+                        </a>
+                        {% else %}
+                        {{ product.name }}
+                        {% endif %}
+                    </td>
+                    <td class="py-3 px-6 text-left">{{ product.sku|default:'-' }}</td>
+                    <td class="py-3 px-6 text-left">{{ product.category.name|default:'-' }}</td>
+                    <td class="py-3 px-6 text-left">{{ product.supplier.name|default:'-' }}</td>
+                    <td class="py-3 px-6 text-right">{{ product.stock_quantity|default:0 }}</td>
+                    <td class="py-3 px-6 text-right">${{ product.price|default:'0.00' }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="py-3 px-6 text-center">No products found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

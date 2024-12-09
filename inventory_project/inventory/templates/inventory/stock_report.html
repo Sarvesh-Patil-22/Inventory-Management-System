@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}Stock Report{% endblock %}
+{% load inventory_filters %}
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Stock Report</h1>
+        <div>
+            <button class="btn btn-outline-primary print-button">
+                <i class="bi bi-printer"></i> Print Report
+            </button>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Total Products</h6>
+                    <h2 class="mb-0">{{ total_products }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Low Stock Items</h6>
+                    <h2 class="mb-0">{{ low_stock_count }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Total Stock Value</h6>
+                    <h2 class="mb-0">${{ total_value|floatformat:2 }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Categories</h6>
+                    <h2 class="mb-0">{{ products|length }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Low Stock Alert -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Low Stock Items</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Current Stock</th>
+                            <th>Reorder Level</th>
+                            <th>Supplier</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in low_stock %}
+                        <tr>
+                            <td>{{ product.name }}</td>
+                            <td>{{ product.category.name|default:"N/A" }}</td>
+                            <td>
+                                <span class="badge bg-danger">{{ product.stock_quantity }}</span>
+                            </td>
+                            <td>{{ product.reorder_level }}</td>
+                            <td>{{ product.supplier.name|default:"N/A" }}</td>
+                            <td>
+                                <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No low stock items found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Selling Products -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Top Selling Products (Last 30 Days)</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Total Quantity Sold</th>
+                            <th>Current Stock</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in top_selling %}
+                        <tr>
+                            <td>{{ item.product.name }}</td>
+                            <td>{{ item.product.category.name|default:"N/A" }}</td>
+                            <td>{{ item.total_quantity }}</td>
+                            <td>{{ item.product.stock_quantity }}</td>
+                            <td>
+                                <a href="{% url 'product_detail' item.product.id %}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">No sales data available</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Full Inventory -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Full Inventory</h5>
+            <div class="input-group input-group-sm w-auto">
+                <input type="text" class="form-control" placeholder="Search inventory..." 
+                       data-search-table="inventoryTable">
+                <span class="input-group-text">
+                    <i class="bi bi-search"></i>
+                </span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="inventoryTable">
+                    <thead>
+                        <tr>
+                            <th class="sortable">Product</th>
+                            <th class="sortable">Category</th>
+                            <th class="sortable">Stock</th>
+                            <th class="sortable">Price</th>
+                            <th class="sortable">Value</th>
+                            <th class="sortable">Supplier</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                        <tr>
+                            <td>{{ product.name }}</td>
+                            <td>{{ product.category.name|default:"N/A" }}</td>
+                            <td>
+                                <span class="badge {% if product.stock_quantity <= product.reorder_level %}bg-danger{% else %}bg-success{% endif %}">
+                                    {{ product.stock_quantity }}
+                                </span>
+                            </td>
+                            <td>${{ product.price|floatformat:2 }}</td>
+                            <td>${{ product.stock_quantity|multiply:product.price|floatformat:2 }}</td>
+                            <td>{{ product.supplier.name|default:"N/A" }}</td>
+                            <td>
+                                <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center">No products found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

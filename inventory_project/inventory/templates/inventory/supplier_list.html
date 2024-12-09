@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Suppliers{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Suppliers</h1>
+        <a href="{% url 'supplier_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> Add Supplier
+        </a>
+    </div>
+
+    <div class="row">
+        {% for supplier in suppliers %}
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ supplier.name }}</h5>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Contact:</strong> {{ supplier.contact_person }}</p>
+                            <p class="mb-1"><strong>Email:</strong> {{ supplier.email }}</p>
+                            <p class="mb-1"><strong>Phone:</strong> {{ supplier.phone }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Address:</strong></p>
+                            <p class="text-muted">{{ supplier.address }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="{% url 'supplier_detail' supplier.id %}" class="btn btn-sm btn-info">
+                        <i class="bi bi-eye"></i> View
+                    </a>
+                    <a href="{% url 'supplier_update' supplier.id %}" class="btn btn-sm btn-warning">
+                        <i class="bi bi-pencil"></i> Edit
+                    </a>
+                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" 
+                            data-bs-target="#deleteModal{{ supplier.id }}">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col">
+            <div class="alert alert-info">No suppliers found.</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% for supplier in suppliers %}
+<div class="modal fade" id="deleteModal{{ supplier.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Supplier</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete "{{ supplier.name }}"?</p>
+                <p class="text-danger">This will affect all products associated with this supplier.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{% url 'supplier_delete' supplier.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
