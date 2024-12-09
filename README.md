@@ -1,4 +1,3 @@
-# Inventory-Management-System
 # Inventory Management Application for Small Businesses
 
 This is an Inventory Management Application designed to help small businesses efficiently manage their stock levels, track sales, and organize supplier information. The application is built using Django, MongoDB, Python, HTML, and CSS, providing an easy-to-use interface for business owners.
@@ -32,5 +31,5 @@ To run the application, you will need the following installed:
 ### 1. Clone the repository:
 
 ```bash
-git clone 
+git clone https://github.com/Sarvesh-Patil-22/Inventory-Management-System.git
 cd inventory-management
